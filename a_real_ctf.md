@@ -32,7 +32,7 @@ O jogo já vem com o **BepInEx** instalado, um mod loader que permite a execuç�
 
 ---
 
-## Análise do verificador
+## Resolução:
 
 A análise do arquivo `verifier` foi feita com **radare2**. Durante a inspeção, foi identificada a função:
 
@@ -42,18 +42,18 @@ Para achar o endereço da função:
 
 <img width="1630" height="204" alt="image" src="https://github.com/user-attachments/assets/5dbc0cc1-144b-498b-addb-6cb261297d84" />
 
-Essa função é relativamente complexa, mas precisamos analisar os seguintes trechos:
+Essa função é relativamente complexa, mas é necessário analisar os seguintes trechos:
 
 <img width="1017" height="199" alt="image" src="https://github.com/user-attachments/assets/13477e8b-1dcc-42d6-989a-38b6d6434c7b" />
 
-Essa são as informações que precisamos para saber onde extrair, onde o verificador lê dados do próprio arquivo, e o tamanho da leitura:
+Essas são as informações necessárias para determinar de onde extrair os dados, em que ponto o verificador lê informações do próprio arquivo e qual é o tamanho da leitura:
 
-OFFSET = 0x2e1f6
-LENGTH = 0x374
+- OFFSET = `0x2e1f6`
+- LENGTH = `0x374`
 
 Essa função está carregando o `game_config` (que contém o nível secreto do CTF) a partir dessa posições, ou seja, o verificador está _auto-contido_, carregando dados escondidos dentro dele.
 
-A partir dessas informações dentro do verifier, vamos rodar o seguinte script para extrair as informações que estão nesse trecho:
+A partir dessas informações obtidas a partir do `verifier`, é possível executar o seguinte script para extrair os dados presentes nesse trecho do binário:
 
 ```python
 # offset e tamanho encontrados na função load()
@@ -76,7 +76,7 @@ Esse script criou o ``game_config.dat`` com base no arquivo ``verifier``.
 
 <img width="1008" height="111" alt="image" src="https://github.com/user-attachments/assets/c592d269-838f-423e-8669-58936647dbd9" />
 
-Agora vamos montar o ambiente, precisamos do game_config.dat e o SolveMod.dll:
+Em seguida, é feita a preparação do ambiente, sendo necessários os arquivos `game_config.dat` e `SolveMod.dll`:
 
 <img width="1030" height="93" alt="image" src="https://github.com/user-attachments/assets/565575da-626f-4602-9b40-568caeac8864" />
 
@@ -91,15 +91,15 @@ O plugin `SolveMod.dll` faz:
 
 (``.dll`` desenvolvido por terceiro)
 
-Uma vez que colocamos os arquivos dentro da pasta do jogo, vamos desbloquear a nova missão secreta.
+Uma vez que os arquivos são colocados dentro da pasta do jogo, a nova missão secreta é desbloqueada.
 
 <img width="1050" height="549" alt="image" src="https://github.com/user-attachments/assets/0c9d4e40-a366-4fe5-ab83-eb89a9c24399" />
 
-Ao jogar, finalizamos a missão para pegar o arquivo que o jogo gera da fase e salvando como ``win.replay``.
+Ao jogar o nível, a missão é concluída e o jogo gera o arquivo de replay da fase, que é salvo como `win.replay`.
 
 <img width="1045" height="544" alt="image" src="https://github.com/user-attachments/assets/1cb9bc5d-7a1a-44f8-b1eb-0795626e856a" />
 
-Por fim, com o win.replay em mão, vamos rodar o submit.py.
+Por fim, com o arquivo `win.replay` em mãos, é executado o script `submit.py`.
 
 ```python
 import requests
